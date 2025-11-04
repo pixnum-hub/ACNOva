@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACnova - AC Installation Calculator</title>
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABFUlEQVRYR+3WsQ3CMAwE0H7ZNEkzYYnYAfEBbG7f1DCfBIecNzE2NLxeAiIAj+zwkT8/6vUUI+X5mM8DspMgANh91cIoH74MPk7LdgA9od9k7J+hnwFvEeCYNpE2KcyCuHacgw7FdtvW4KkMKNc4R16FFZnwb2KhMN6dY+UinCC+eM4Uq6bLkgeHNsRV8G3mDKwmZq0Oa8b8Kvs+Yaf6HtlGoMeiUX0p6LVF0gUtj7YgKZqFGM0G65IqfLAgRjv5QgT/4iB5cT2Uo/SmUU4WnB3z1QLA9BWhzHnnmSXxw6WqzDW4s0X3/Tvbx2i2P1v2JvYf+u1u6QWQAAAABJRU5ErkJggg==">
+<style>
+* {margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif;}
+body {display:flex; justify-content:center; align-items:center; min-height:100vh; background:#e0e0e0; transition:0.3s;}
+body.dark {background:#2b2b2b; color:#e0e0e0;}
+.frame {position:relative; border:2px solid #ccc; border-radius:30px; padding:20px; background:#e0e0e0; box-shadow: 8px 8px 30px #bebebe, -8px -8px 30px #ffffff; max-width:520px; width:95%; transition:0.3s;}
+body.dark .frame {background:#2b2b2b; border-color:#444; box-shadow:8px 8px 30px #1a1a1a, -8px -8px 30px #3a3a3a;}
+.calculator {border-radius:25px; padding:30px; text-align:center; transition:0.3s;}
+h1 {margin-bottom:20px;}
+input, select {width:100%; padding:15px; margin:5px 0 15px 0; border:none; border-radius:12px; box-shadow:inset 5px 5px 10px #bebebe, inset -5px -5px 10px #ffffff; outline:none; font-size:16px; transition:0.3s;}
+body.dark input, body.dark select {box-shadow:inset 5px 5px 10px #1a1a1a, inset -5px -5px 10px #3a3a3a; background:#2b2b2b; color:#e0e0e0;}
+button.calc-btn {padding:15px 25px; margin-top:10px; width:100%; border:none; border-radius:25px; background:#e0e0e0; box-shadow:5px 5px 15px #bebebe, -5px -5px 15px #ffffff; cursor:pointer; font-size:16px; transition:0.3s;}
+button.calc-btn:hover {box-shadow:2px 2px 5px #bebebe, -2px -2px 5px #ffffff;}
+body.dark button.calc-btn {background:#2b2b2b; box-shadow:5px 5px 15px #1a1a1a, -5px -5px 15px #3a3a3a; color:#e0e0e0;}
+.result {margin-top:20px; font-weight:bold; font-size:16px; text-align:left;}
+label {display:block; text-align:left; margin-top:10px; font-weight:bold;}
+
+/* NEW Round Dark Mode Toggle */
+.toggle-container {
+  position:absolute;
+  top:20px;
+  right:20px;
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  background:#e0e0e0;
+  box-shadow:5px 5px 15px #bebebe, -5px -5px 15px #ffffff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:0.3s;
+}
+.toggle-container.dark {background:#2b2b2b; box-shadow:5px 5px 15px #1a1a1a, -5px -5px 15px #3a3a3a;}
+.toggle-icon {font-size:24px; transition:0.3s; color:#555;}
+body.dark .toggle-icon {color:#f1c40f;}
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <div class="toggle-container" onclick="toggleDarkMode()">
+    <span class="toggle-icon">🌙</span>
+  </div>
+  <div class="calculator">
+    <h1>ACnova</h1>
+    
+    <label for="area">Room Area (sq ft):</label>
+    <input type="number" id="area" placeholder="Enter room area" min="1" oninput="suggestUnits()">
+    
+    <label for="height">Ceiling Height (ft):</label>
+    <input type="number" id="height" placeholder="Enter ceiling height" min="6" oninput="suggestUnits()">
+    
+    <label for="sun">Sun Exposure:</label>
+    <select id="sun" onchange="suggestUnits()">
+      <option value="" selected disabled>Select sun exposure</option>
+      <option value="low">Low</option>
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+    </select>
+    
+    <label for="insulation">Insulation Quality:</label>
+    <select id="insulation" onchange="suggestUnits()">
+      <option value="" selected disabled>Select insulation quality</option>
+      <option value="good">Good</option>
+      <option value="average">Average</option>
+      <option value="poor">Poor</option>
+    </select>
+    
+    <label for="acType">AC Type:</label>
+    <select id="acType" onchange="suggestUnits(); updateUnitTons()">
+      <option value="" selected disabled>Select AC type</option>
+      <option value="window">Window AC</option>
+      <option value="split">Split AC</option>
+    </select>
+
+    <label for="brand">Brand:</label>
+    <select id="brand">
+      <option value="" selected disabled>Select brand</option>
+      <option value="BrandA">Brand A (+0%)</option>
+      <option value="BrandB">Brand B (+10%)</option>
+      <option value="BrandC">Brand C (+20%)</option>
+    </select>
+
+    <label for="star">Energy Rating:</label>
+    <select id="star">
+      <option value="" selected disabled>Select rating</option>
+      <option value="1">1★</option>
+      <option value="2">2★</option>
+      <option value="3">3★</option>
+      <option value="4">4★</option>
+      <option value="5">5★</option>
+    </select>
+
+    <label for="roomType">Room Type:</label>
+    <select id="roomType" onchange="suggestUnits()">
+      <option value="" selected disabled>Select room type</option>
+      <option value="bedroom">Bedroom</option>
+      <option value="living">Living Room</option>
+      <option value="kitchen">Kitchen</option>
+      <option value="office">Office</option>
+    </select>
+
+    <label for="access">Installation Difficulty:</label>
+    <select id="access">
+      <option value="" selected disabled>Select difficulty</option>
+      <option value="easy">Easy</option>
+      <option value="moderate">Moderate</option>
+      <option value="difficult">Difficult</option>
+    </select>
+
+    <label for="hours">Usage per day (hrs):</label>
+    <input type="number" id="hours" placeholder="Enter daily hours" min="1">
+
+    <label for="units">Number of AC Units:</label>
+    <input type="number" id="units" placeholder="Enter number of units" min="1" oninput="updateUnitTons()">
+    <span id="unitInfo" style="display:block; font-size:14px; margin-top:5px;"></span>
+
+    <label>Optional Accessories:</label>
+    <input type="checkbox" id="stabilizer" value="1500"> Stabilizer (+₹1500)<br>
+    <input type="checkbox" id="remote" value="500"> Remote Control (+₹500)<br>
+
+    <button class="calc-btn" onclick="calculate()">Calculate Cost</button>
+    <button class="calc-btn" onclick="clearAll()">Clear</button>
+    
+    <div class="result" id="result"></div>
+    
+    <p style="margin-top:20px;font-size:12px;">© ACnova 2025</p>
+  </div>
+</div>
+
+<script>
+function suggestUnits() {
+  const area=parseFloat(document.getElementById('area').value);
+  const height=parseFloat(document.getElementById('height').value);
+  const sun=document.getElementById('sun').value;
+  const insulation=document.getElementById('insulation').value;
+  const acType=document.getElementById('acType').value;
+  const roomType=document.getElementById('roomType').value;
+  const unitsInput=document.getElementById('units');
+  if(!area||!height||!sun||!insulation||!acType) return;
+  let btu=area*height*3;
+  if(sun==='medium') btu*=1.1; else if(sun==='high') btu*=1.25;
+  if(insulation==='average') btu*=1.1; else if(insulation==='poor') btu*=1.25;
+  if(roomType==='kitchen') btu*=1.1; else if(roomType==='living') btu*=1.05;
+  btu=Math.ceil(btu/500)*500;
+  const unitCapacity=acType==='window'?7000:12000;
+  unitsInput.value=Math.ceil(btu/unitCapacity);
+  updateUnitTons();
+}
+
+function updateUnitTons(){
+  const units=parseInt(document.getElementById('units').value);
+  const acType=document.getElementById('acType').value;
+  const unitInfo=document.getElementById('unitInfo');
+  if(!units||!acType){unitInfo.innerText=''; return;}
+  const unitCapacity=acType==='window'?7000:12000;
+  const unitTons=(unitCapacity/12000).toFixed(2);
+  const totalTons=(units*unitCapacity/12000).toFixed(2);
+  unitInfo.innerText=`Each Unit: ${unitCapacity} BTU / ${unitTons} Ton | Total: ${totalTons} Ton`;
+}
+
+function calculate(){
+  const area=parseFloat(document.getElementById('area').value);
+  const height=parseFloat(document.getElementById('height').value);
+  const sun=document.getElementById('sun').value;
+  const insulation=document.getElementById('insulation').value;
+  const acType=document.getElementById('acType').value;
+  const brand=document.getElementById('brand').value;
+  const star=parseInt(document.getElementById('star').value);
+  const roomType=document.getElementById('roomType').value;
+  const access=document.getElementById('access').value;
+  const hours=parseFloat(document.getElementById('hours').value);
+  const units=parseInt(document.getElementById('units').value);
+  const resultDiv=document.getElementById('result');
+  if(!area||!height||!sun||!insulation||!acType||!brand||!star||!roomType||!access||!hours||!units){
+    resultDiv.innerText="Please fill all required fields correctly."; return;
+  }
+  let btu=area*height*3;
+  if(sun==='medium') btu*=1.1; else if(sun==='high') btu*=1.25;
+  if(insulation==='average') btu*=1.1; else if(insulation==='poor') btu*=1.25;
+  if(roomType==='kitchen') btu*=1.1; else if(roomType==='living') btu*=1.05;
+  btu=Math.ceil(btu/500)*500;
+  let baseCost,labor,unitCapacity;
+  if(acType==='window'){baseCost=2000; labor=1000; unitCapacity=7000;}
+  else{baseCost=3500; labor=2000; unitCapacity=12000;}
+  let brandMultiplier=1;
+  if(brand==='BrandB') brandMultiplier=1.1;
+  else if(brand==='BrandC') brandMultiplier=1.2;
+  let laborMultiplier=access==='moderate'?1.2:access==='difficult'?1.5:1;
+  const suggestedUnits=Math.ceil(btu/unitCapacity);
+  let totalPerUnit=(baseCost+labor)*brandMultiplier*laborMultiplier+area*10;
+  const stabilizer=document.getElementById('stabilizer').checked?1500:0;
+  const remote=document.getElementById('remote').checked?500:0;
+  totalPerUnit+=stabilizer+remote;
+  const totalCost=totalPerUnit*suggestedUnits;
+  const totalTons=(btu/12000).toFixed(2);
+  const unitTons=(unitCapacity/12000).toFixed(2);
+  const dailyKWh=(unitCapacity/12000)*hours;
+  const monthlyKWh=dailyKWh*30*suggestedUnits;
+  const monthlyCost=monthlyKWh*8;
+  resultDiv.innerHTML=`
+    Required Cooling Capacity: ${btu} BTU (${totalTons} Ton)<br>
+    Suggested Units: ${suggestedUnits} (Each: ${unitCapacity} BTU / ${unitTons} Ton)<br>
+    Base + Labor + Accessories per Unit: ₹${totalPerUnit.toLocaleString()}<br>
+    <strong>Estimated Installation Cost: ₹${totalCost.toLocaleString()}</strong><br>
+    Estimated Monthly Energy: ${monthlyKWh.toFixed(2)} kWh (~₹${monthlyCost.toFixed(0)})<br>
+    Star Rating: ${star}★`;
+}
+
+function clearAll(){
+  document.getElementById('area').value='';
+  document.getElementById('height').value='';
+  document.getElementById('sun').value='';
+  document.getElementById('insulation').value='';
+  document.getElementById('acType').value='';
+  document.getElementById('brand').value='';
+  document.getElementById('star').value='';
+  document.getElementById('roomType').value='';
+  document.getElementById('access').value='';
+  document.getElementById('hours').value='';
+  document.getElementById('units').value='';
+  document.getElementById('unitInfo').innerText='';
+  document.getElementById('stabilizer').checked=false;
+  document.getElementById('remote').checked=false;
+  document.getElementById('result').innerText='';
+}
+
+function toggleDarkMode(){
+  document.body.classList.toggle('dark');
+  const toggle = document.querySelector('.toggle-container');
+  const icon = document.querySelector('.toggle-icon');
+  if(document.body.classList.contains('dark')){
+    toggle.classList.add('dark');
+    icon.innerText='☀️';
+  } else {
+    toggle.classList.remove('dark');
+    icon.innerText='🌙';
+  }
+}
+</script>
+</body>
+</html>
